@@ -2,7 +2,6 @@ package inventory;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import product.HealthPotion;
 import product.Salable;
 

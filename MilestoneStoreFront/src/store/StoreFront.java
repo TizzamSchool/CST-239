@@ -1,7 +1,6 @@
 package store;
 
 import java.util.Scanner;
-
 import cart.ShoppingCart;
 import inventory.InventoryManager;
 import product.Salable;
