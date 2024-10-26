@@ -5,7 +5,7 @@ import java.util.List;
 import product.Salable;
 
 /**
- * Class to manage the shopping cart.
+ * Class to manage the user's shopping cart.
  */
 public class ShoppingCart {
     private List<Salable> cartItems;
@@ -15,25 +15,10 @@ public class ShoppingCart {
         cartItems = new ArrayList<>();
     }
 
-    /**
-     * Adds a product to the shopping cart.
-     * @param product Salable product to add.
-     */
-    public void addProductToCart(Salable product) {
-        cartItems.add(product);
-    }
+    public void addProductToCart(Salable product) { cartItems.add(product); }
 
-    /**
-     * Removes a product from the shopping cart.
-     * @param product Salable product to remove.
-     */
-    public void removeProductFromCart(Salable product) {
-        cartItems.remove(product);
-    }
+    public void removeProductFromCart(Salable product) { cartItems.remove(product); }
 
-    /**
-     * Displays all items in the cart.
-     */
     public void viewCartItems() {
         if (cartItems.isEmpty()) {
             System.out.println("Your cart is empty.");
@@ -45,8 +30,5 @@ public class ShoppingCart {
         }
     }
 
-    /** Clears all items from the cart. */
-    public void clearCart() {
-        cartItems.clear();
-    }
+    public void clearCart() { cartItems.clear(); }
 }

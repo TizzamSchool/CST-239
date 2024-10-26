@@ -22,7 +22,7 @@ public class StoreFront {
 
     /** Initializes the store with products. */
     public void initializeStore() {
-        inventoryManager.loadProducts();
+        inventoryManager.loadInitialInventory();
         System.out.println("Welcome to the Arena Store Front!");
     }
 
@@ -37,7 +37,7 @@ public class StoreFront {
         System.out.println("6. Exit");
     }
 
-    /** Handles user interactions with the store. */
+    /** Runs the store front application. */
     public void run() {
         initializeStore();
         boolean running = true;
