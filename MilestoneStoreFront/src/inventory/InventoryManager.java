@@ -10,6 +10,7 @@ import product.Weapon;
 
 /**
  * Class to manage the inventory of products in the store.
+ * Provides methods to initialize, add, remove, and retrieve products.
  */
 public class InventoryManager {
     private List<Salable> products;
@@ -20,7 +21,7 @@ public class InventoryManager {
     }
 
     /** Loads the initial products into the inventory. */
-    public void loadInitialInventory() {
+    public void initializeInventory() {
         products.add(new Weapon("Sword", "A sharp steel blade", 50, 5, 10));
         products.add(new Weapon("Axe", "A heavy double-edged axe", 60, 3, 15));
         products.add(new Armor("Shield", "Protective wooden shield", 40, 4, 8));
@@ -28,8 +29,21 @@ public class InventoryManager {
         products.add(new HealthPotion("Health Potion", "Restores 50 HP", 10, 10, 50));
     }
 
-    public List<Salable> listAllProducts() { return products; }
+    /**
+     * Returns a list of all products in the inventory.
+     * 
+     * @return A list of Salable products.
+     */
+    public List<Salable> getInventory() {
+        return products;
+    }
 
+    /**
+     * Finds and returns a product by name in the inventory.
+     * 
+     * @param name The name of the product to search for.
+     * @return The Salable product if found, otherwise null.
+     */
     public Salable getProductByName(String name) {
         for (Salable product : products) {
             if (product.getName().equalsIgnoreCase(name)) {
@@ -39,7 +53,26 @@ public class InventoryManager {
         return null;
     }
 
-    public void updateQuantity(Salable product, int newQuantity) {
-        product.setQuantity(newQuantity);
+    /**
+     * Removes a product from the inventory by reducing its quantity.
+     * 
+     * @param product The product to remove.
+     * @return True if the product was successfully removed or updated, false if not.
+     */
+    public boolean removeProduct(Salable product) {
+        if (product.getQuantity() > 0) {
+            product.setQuantity(product.getQuantity() - 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adds a product back to the inventory by increasing its quantity.
+     * 
+     * @param product The product to add.
+     */
+    public void addProduct(Salable product) {
+        product.setQuantity(product.getQuantity() + 1);
     }
 }

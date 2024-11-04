@@ -5,8 +5,10 @@ import cart.ShoppingCart;
 import inventory.InventoryManager;
 import product.Salable;
 
+
 /**
  * Main class for the Store Front Application.
+ * Manages interactions between the user, inventory, and shopping cart.
  */
 public class StoreFront {
     private InventoryManager inventoryManager;
@@ -22,7 +24,7 @@ public class StoreFront {
 
     /** Initializes the store with products. */
     public void initializeStore() {
-        inventoryManager.loadInitialInventory();
+        inventoryManager.initializeInventory();
         System.out.println("Welcome to the Arena Store Front!");
     }
 
@@ -56,7 +58,7 @@ public class StoreFront {
                     purchaseProduct();
                     break;
                 case 3:
-                    shoppingCart.viewCartItems();
+                    viewCart();
                     break;
                 case 4:
                     cancelPurchase();
@@ -75,13 +77,15 @@ public class StoreFront {
         System.out.println("Thank you for visiting the Arena Store!");
     }
 
+    /** Displays all products available in the inventory. */
     private void viewProducts() {
         System.out.println("Available Products:");
-        for (Salable product : inventoryManager.listAllProducts()) {
+        for (Salable product : inventoryManager.getInventory()) {
             System.out.println(product);
         }
     }
 
+    /** Allows the user to purchase a product and adds it to the shopping cart. */
     private void purchaseProduct() {
         System.out.print("Enter product name: ");
         String name = scanner.nextLine();
@@ -89,33 +93,44 @@ public class StoreFront {
 
         if (product != null && product.getQuantity() > 0) {
             shoppingCart.addProductToCart(product);
-            inventoryManager.updateQuantity(product, product.getQuantity() - 1);
+            inventoryManager.removeProduct(product);
             System.out.println("Product added to cart.");
         } else {
             System.out.println("Product not available.");
         }
     }
 
+    /** Displays the contents of the shopping cart. */
+    private void viewCart() {
+        System.out.println("Shopping Cart:");
+        for (Salable item : shoppingCart.getCartContents()) {
+            System.out.println(item);
+        }
+    }
+
+    /** Cancels a purchase by removing an item from the cart and returning it to inventory. */
     private void cancelPurchase() {
         System.out.print("Enter product name to remove: ");
         String name = scanner.nextLine();
         Salable product = inventoryManager.getProductByName(name);
 
-        if (product != null) {
+        if (product != null && shoppingCart.getCartContents().contains(product)) {
             shoppingCart.removeProductFromCart(product);
-            inventoryManager.updateQuantity(product, product.getQuantity() + 1);
+            inventoryManager.addProduct(product);
             System.out.println("Product removed from cart.");
         } else {
             System.out.println("Product not found in cart.");
         }
     }
 
+    /** Completes the purchase, clears the cart, and displays a thank you message. */
     private void checkout() {
-        shoppingCart.viewCartItems();
+        viewCart();
         shoppingCart.clearCart();
         System.out.println("Checkout complete. Thank you for your purchase!");
     }
 
+    /** Main method to start the application. */
     public static void main(String[] args) {
         StoreFront store = new StoreFront();
         store.run();
