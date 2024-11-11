@@ -1,0 +1,49 @@
+[ {
+  "type" : "weapon",
+  "name" : "Sword",
+  "description" : "A sharp steel blade",
+  "price" : 50,
+  "quantity" : 4,
+  "damage" : 10,
+  "weaponType" : "Melee"
+}, {
+  "type" : "weapon",
+  "name" : "Axe",
+  "description" : "A heavy axe",
+  "price" : 60,
+  "quantity" : 3,
+  "damage" : 15,
+  "weaponType" : "Melee"
+}, {
+  "type" : "armor",
+  "name" : "Shield",
+  "description" : "Protective wooden shield",
+  "price" : 40,
+  "quantity" : 3,
+  "defense" : 8,
+  "material" : "Wood"
+}, {
+  "type" : "armor",
+  "name" : "Helmet",
+  "description" : "Iron helmet for head protection",
+  "price" : 30,
+  "quantity" : 4,
+  "defense" : 5,
+  "material" : "Metal"
+}, {
+  "type" : "healthPotion",
+  "name" : "Health Potion",
+  "description" : "Restores 50 HP",
+  "price" : 10,
+  "quantity" : 10,
+  "healingAmount" : 50,
+  "potionType" : "Small"
+}, {
+  "type" : "healthPotion",
+  "name" : "Large Health Potion",
+  "description" : "Restores 100 HP",
+  "price" : 20,
+  "quantity" : 5,
+  "healingAmount" : 100,
+  "potionType" : "Large"
+} ]

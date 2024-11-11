@@ -1,138 +1,152 @@
 package store;
 
-import java.util.Scanner;
 import cart.ShoppingCart;
 import inventory.InventoryManager;
 import product.Salable;
+import cart.Order;
 
+import java.util.Scanner;
 
-/**
- * Main class for the Store Front Application.
- * Manages interactions between the user, inventory, and shopping cart.
- */
 public class StoreFront {
     private InventoryManager inventoryManager;
     private ShoppingCart shoppingCart;
-    private Scanner scanner;
 
-    /** Constructor to initialize the store front. */
     public StoreFront() {
         inventoryManager = new InventoryManager();
         shoppingCart = new ShoppingCart();
-        scanner = new Scanner(System.in);
-    }
-
-    /** Initializes the store with products. */
-    public void initializeStore() {
-        inventoryManager.initializeInventory();
-        System.out.println("Welcome to the Arena Store Front!");
-    }
-
-    /** Displays the main menu to the user. */
-    public void displayMenu() {
-        System.out.println("\nMain Menu:");
-        System.out.println("1. View Products");
-        System.out.println("2. Purchase Product");
-        System.out.println("3. View Shopping Cart");
-        System.out.println("4. Cancel Purchase");
-        System.out.println("5. Checkout");
-        System.out.println("6. Exit");
-    }
-
-    /** Runs the store front application. */
-    public void run() {
-        initializeStore();
-        boolean running = true;
-
-        while (running) {
-            displayMenu();
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-
-            switch (choice) {
-                case 1:
-                    viewProducts();
-                    break;
-                case 2:
-                    purchaseProduct();
-                    break;
-                case 3:
-                    viewCart();
-                    break;
-                case 4:
-                    cancelPurchase();
-                    break;
-                case 5:
-                    checkout();
-                    break;
-                case 6:
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Invalid choice. Try again.");
-                    break;
-            }
+        try {
+            inventoryManager.initializeInventory();
+        } catch (Exception e) {
+            System.out.println("Error initializing inventory: " + e.getMessage());
         }
-        System.out.println("Thank you for visiting the Arena Store!");
     }
 
-    /** Displays all products available in the inventory. */
-    private void viewProducts() {
+    /**
+     * Handles purchasing an item by reducing its quantity and adding it to the cart.
+     */
+    public void purchaseItem(String itemName) {
+        Salable product = inventoryManager.getProductByName(itemName);
+        
+        if (product != null && product.getQuantity() > 0) {
+            inventoryManager.removeProduct(product);
+            shoppingCart.addItem(product);  // Adds the item to the cart
+            
+            try {
+                inventoryManager.saveInventoryToFile();
+            } catch (Exception e) {
+                System.out.println("Error saving inventory: " + e.getMessage());
+            }
+
+            System.out.println("Item added to cart.");
+        } else {
+            System.out.println("Item not available.");
+        }
+    }
+
+    /**
+     * Handles cancellation by removing items from the cart and adding them back to the inventory.
+     */
+    public void cancelPurchase(String itemName) {
+        Salable product = shoppingCart.removeItem(itemName);  // Removes the item from the cart
+        
+        if (product != null) {
+            product.setQuantity(product.getQuantity() + 1);
+            
+            try {
+                inventoryManager.saveInventoryToFile();
+            } catch (Exception e) {
+                System.out.println("Error saving inventory: " + e.getMessage());
+            }
+
+            System.out.println("Purchase canceled, item returned to inventory.");
+        } else {
+            System.out.println("Item not found in cart.");
+        }
+    }
+
+    /**
+     * Handles checkout by finalizing the purchase and clearing the shopping cart.
+     */
+    public void checkout() {
+        if (shoppingCart.getCartItems().isEmpty()) {  // Now using getCartItems
+            System.out.println("Cart is empty. Nothing to checkout.");
+        } else {
+            // Create a new order with the current contents of the shopping cart
+            Order order = new Order(shoppingCart);
+            order.displayOrderDetails();  // Display order details to the user
+            
+            shoppingCart.emptyCart();  // Clear the cart after checkout
+            System.out.println("Checkout complete. Thank you for your purchase!");
+        }
+    }
+
+    /**
+     * Displays the inventory list.
+     */
+    public void viewInventory() {
         System.out.println("Available Products:");
         for (Salable product : inventoryManager.getInventory()) {
             System.out.println(product);
         }
     }
 
-    /** Allows the user to purchase a product and adds it to the shopping cart. */
-    private void purchaseProduct() {
-        System.out.print("Enter product name: ");
-        String name = scanner.nextLine();
-        Salable product = inventoryManager.getProductByName(name);
-
-        if (product != null && product.getQuantity() > 0) {
-            shoppingCart.addProductToCart(product);
-            inventoryManager.removeProduct(product);
-            System.out.println("Product added to cart.");
-        } else {
-            System.out.println("Product not available.");
-        }
-    }
-
-    /** Displays the contents of the shopping cart. */
-    private void viewCart() {
-        System.out.println("Shopping Cart:");
-        for (Salable item : shoppingCart.getCartContents()) {
+    /**
+     * Displays the shopping cart contents.
+     */
+    public void viewCart() {
+        System.out.println("Items in Cart:");
+        for (Salable item : shoppingCart.getCartItems()) {  // Now using getCartItems
             System.out.println(item);
         }
     }
 
-    /** Cancels a purchase by removing an item from the cart and returning it to inventory. */
-    private void cancelPurchase() {
-        System.out.print("Enter product name to remove: ");
-        String name = scanner.nextLine();
-        Salable product = inventoryManager.getProductByName(name);
-
-        if (product != null && shoppingCart.getCartContents().contains(product)) {
-            shoppingCart.removeProductFromCart(product);
-            inventoryManager.addProduct(product);
-            System.out.println("Product removed from cart.");
-        } else {
-            System.out.println("Product not found in cart.");
-        }
-    }
-
-    /** Completes the purchase, clears the cart, and displays a thank you message. */
-    private void checkout() {
-        viewCart();
-        shoppingCart.clearCart();
-        System.out.println("Checkout complete. Thank you for your purchase!");
-    }
-
-    /** Main method to start the application. */
+    /**
+     * Main method to run the StoreFront application with a simple console-based menu.
+     */
     public static void main(String[] args) {
-        StoreFront store = new StoreFront();
-        store.run();
+        StoreFront storeFront = new StoreFront();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\nWelcome to the Store Front");
+            System.out.println("1. View Inventory");
+            System.out.println("2. Purchase Item");
+            System.out.println("3. Cancel Purchase");
+            System.out.println("4. View Cart");
+            System.out.println("5. Checkout");
+            System.out.println("6. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    storeFront.viewInventory();
+                    break;
+                case 2:
+                    System.out.print("Enter item name to purchase: ");
+                    String purchaseItem = scanner.nextLine();
+                    storeFront.purchaseItem(purchaseItem);
+                    break;
+                case 3:
+                    System.out.print("Enter item name to cancel purchase: ");
+                    String cancelItem = scanner.nextLine();
+                    storeFront.cancelPurchase(cancelItem);
+                    break;
+                case 4:
+                    storeFront.viewCart();
+                    break;
+                case 5:
+                    storeFront.checkout();
+                    break;
+                case 6:
+                    System.out.println("Exiting Store Front. Thank you!");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
     }
 }

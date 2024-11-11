@@ -1,24 +1,29 @@
 package product;
 
-/**
- * Abstract class representing a salable product in the store.
- * Implements the Comparable interface to enable sorting by name (case-insensitive)
- * and then by price in ascending order.
- */
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+
+@JsonTypeInfo(
+  use = Id.NAME, 
+  include = JsonTypeInfo.As.PROPERTY, 
+  property = "type"
+)
+@JsonSubTypes({
+  @Type(value = Weapon.class, name = "weapon"),
+  @Type(value = Armor.class, name = "armor"),
+  @Type(value = HealthPotion.class, name = "healthPotion")
+})
 public abstract class Salable implements Comparable<Salable> {
     protected String name;
     protected String description;
-    protected int price; // Price in gold pieces
-    protected int quantity; // Available quantity in stock
+    protected int price;
+    protected int quantity;
 
-    /**
-     * Constructor to initialize a Salable product.
-     * 
-     * @param name The name of the product.
-     * @param description A brief description of the product.
-     * @param price The price of the product in gold pieces.
-     * @param quantity The available quantity of the product in stock.
-     */
+    // Protected no-argument constructor for Jackson deserialization
+    protected Salable() {}
+
     public Salable(String name, String description, int price, int quantity) {
         this.name = name;
         this.description = description;
@@ -26,74 +31,18 @@ public abstract class Salable implements Comparable<Salable> {
         this.quantity = quantity;
     }
 
-    /**
-     * Returns the name of the product.
-     * 
-     * @return The name of the product.
-     */
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public int getPrice() { return price; }
+    public int getQuantity() { return quantity; }
 
-    /**
-     * Returns the description of the product.
-     * 
-     * @return The description of the product.
-     */
-    public String getDescription() {
-        return description;
-    }
+    public void setQuantity(int newQuantity) { this.quantity = newQuantity; }
 
-    /**
-     * Returns the price of the product in gold pieces.
-     * 
-     * @return The price of the product.
-     */
-    public int getPrice() {
-        return price;
-    }
-
-    /**
-     * Returns the quantity of the product available in stock.
-     * 
-     * @return The available quantity of the product.
-     */
-    public int getQuantity() {
-        return quantity;
-    }
-
-    /**
-     * Updates the quantity of the product in stock.
-     * 
-     * @param newQuantity The new quantity to set.
-     */
-    public void setQuantity(int newQuantity) {
-        this.quantity = newQuantity;
-    }
-
-    /**
-     * Compares this product with another product for sorting.
-     * Primary comparison is by name (case-insensitive alphabetical order).
-     * Secondary comparison is by price (ascending).
-     * 
-     * @param other The other Salable product to compare to.
-     * @return A negative integer, zero, or a positive integer as this product
-     *         is less than, equal to, or greater than the specified product.
-     */
     @Override
     public int compareTo(Salable other) {
         int nameComparison = this.name.compareToIgnoreCase(other.name);
-        if (nameComparison != 0) {
-            return nameComparison;
-        }
-        return Integer.compare(this.price, other.price);
+        return nameComparison != 0 ? nameComparison : Integer.compare(this.price, other.price);
     }
 
-    /**
-     * Abstract method to return a string representation of the product.
-     * Subclasses must implement this method.
-     * 
-     * @return A string representing the product details.
-     */
     public abstract String toString();
 }

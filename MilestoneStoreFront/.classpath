@@ -1,10 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Tizzam/Desktop/GCU/CST-239 Programming in Java II/Storefront Project/Java Libraries/jackson-annotations-2.13.5.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Tizzam/Desktop/GCU/CST-239 Programming in Java II/Storefront Project/Java Libraries/jackson-core-2.13.5.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Tizzam/Desktop/GCU/CST-239 Programming in Java II/Storefront Project/Java Libraries/jackson-databind-2.13.5.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/topic4_2/jackson-annotations-2.10.5.jar"/>
+	<classpathentry kind="lib" path="/topic4_2/jackson-core-2.10.5.jar"/>
+	<classpathentry kind="lib" path="/topic4_2/jackson-databind-2.10.5.jar" sourcepath="/topic4_2/jackson-databind-2.10.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

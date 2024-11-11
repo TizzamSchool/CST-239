@@ -1,49 +1,67 @@
 package inventory;
 
-import java.util.ArrayList;
-import java.util.List;
-import product.Armor;
-import product.HealthPotion;
 import product.Salable;
 import product.Weapon;
+import product.Armor;
+import product.HealthPotion;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Class to manage the inventory of products in the store.
- * Provides methods to initialize, add, remove, and retrieve products.
- */
 public class InventoryManager {
     private List<Salable> products;
+    private static final String DEFAULT_FILE_PATH = "inventory.json";
 
-    /** Constructor to initialize the product inventory. */
     public InventoryManager() {
         products = new ArrayList<>();
     }
 
-    /** Loads the initial products into the inventory. */
-    public void initializeInventory() {
-        products.add(new Weapon("Sword", "A sharp steel blade", 50, 5, 10));
-        products.add(new Weapon("Axe", "A heavy double-edged axe", 60, 3, 15));
-        products.add(new Armor("Shield", "Protective wooden shield", 40, 4, 8));
-        products.add(new Armor("Helmet", "Iron helmet for head protection", 30, 6, 5));
-        products.add(new HealthPotion("Health Potion", "Restores 50 HP", 10, 10, 50));
+    /**
+     * Initializes the inventory from file if it exists; otherwise, creates the default inventory.
+     */
+    public void initializeInventory() throws InventoryFileException {
+        initializeInventoryFromFile(DEFAULT_FILE_PATH);
     }
 
     /**
-     * Returns a list of all products in the inventory.
-     * 
-     * @return A list of Salable products.
+     * Loads inventory from file if it exists; otherwise, creates and saves the default inventory.
      */
-    public List<Salable> getInventory() {
-        return products;
+    private void initializeInventoryFromFile(String filePath) throws InventoryFileException {
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            System.out.println("Inventory file not found. Creating a new file with default inventory.");
+            products = getDefaultInventory();
+            saveInventoryToFile();  // Save default inventory to file
+        } else {
+            products = FileService.readInventoryFromFile(filePath);  // Load existing inventory
+        }
     }
 
     /**
-     * Finds and returns a product by name in the inventory.
-     * 
-     * @param name The name of the product to search for.
-     * @return The Salable product if found, otherwise null.
+     * Returns a default list of Salable products to be used if no inventory file exists.
      */
+    private List<Salable> getDefaultInventory() {
+        List<Salable> defaultInventory = new ArrayList<>();
+        
+        // Adding Weapon items
+        defaultInventory.add(new Weapon("Sword", "A sharp steel blade", 50, 5, 10, "Melee"));
+        defaultInventory.add(new Weapon("Axe", "A heavy axe", 60, 3, 15, "Melee"));
+
+        // Adding Armor items
+        defaultInventory.add(new Armor("Shield", "Protective wooden shield", 40, 3, 8, "Wood"));
+        defaultInventory.add(new Armor("Helmet", "Iron helmet for head protection", 30, 5, 5, "Metal"));
+
+        // Adding HealthPotion items
+        defaultInventory.add(new HealthPotion("Health Potion", "Restores 50 HP", 10, 10, 50, "Small"));
+        defaultInventory.add(new HealthPotion("Large Health Potion", "Restores 100 HP", 20, 5, 100, "Large"));
+
+        return defaultInventory;
+    }
+
+    public List<Salable> getInventory() { return products; }
+
     public Salable getProductByName(String name) {
         for (Salable product : products) {
             if (product.getName().equalsIgnoreCase(name)) {
@@ -54,10 +72,7 @@ public class InventoryManager {
     }
 
     /**
-     * Removes a product from the inventory by reducing its quantity.
-     * 
-     * @param product The product to remove.
-     * @return True if the product was successfully removed or updated, false if not.
+     * Decreases the quantity of a product if available and returns true if successful.
      */
     public boolean removeProduct(Salable product) {
         if (product.getQuantity() > 0) {
@@ -68,11 +83,9 @@ public class InventoryManager {
     }
 
     /**
-     * Adds a product back to the inventory by increasing its quantity.
-     * 
-     * @param product The product to add.
+     * Saves the current inventory state to a JSON file.
      */
-    public void addProduct(Salable product) {
-        product.setQuantity(product.getQuantity() + 1);
+    public void saveInventoryToFile() throws InventoryFileException {
+        FileService.writeInventoryToFile(DEFAULT_FILE_PATH, products);
     }
 }
