@@ -1,91 +1,90 @@
 package inventory;
 
 import product.Salable;
-import product.Weapon;
-import product.Armor;
-import product.HealthPotion;
-
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
+/**
+ * Manages the store's inventory of Salable products.
+ */
 public class InventoryManager {
-    private List<Salable> products;
-    private static final String DEFAULT_FILE_PATH = "inventory.json";
+    private ArrayList<Salable> products;
 
     public InventoryManager() {
         products = new ArrayList<>();
     }
 
     /**
-     * Initializes the inventory from file if it exists; otherwise, creates the default inventory.
+     * Initializes the inventory from default or loads from a JSON file.
      */
-    public void initializeInventory() throws InventoryFileException {
-        initializeInventoryFromFile(DEFAULT_FILE_PATH);
-    }
-
-    /**
-     * Loads inventory from file if it exists; otherwise, creates and saves the default inventory.
-     */
-    private void initializeInventoryFromFile(String filePath) throws InventoryFileException {
-        File file = new File(filePath);
-
-        if (!file.exists()) {
-            System.out.println("Inventory file not found. Creating a new file with default inventory.");
+    public void initializeInventory() {
+        // Load or populate default items
+        products = FileService.readInventoryFromFile("inventory.json");
+        if (products == null || products.isEmpty()) {
             products = getDefaultInventory();
-            saveInventoryToFile();  // Save default inventory to file
-        } else {
-            products = FileService.readInventoryFromFile(filePath);  // Load existing inventory
+            saveInventoryToFile();
         }
     }
 
     /**
-     * Returns a default list of Salable products to be used if no inventory file exists.
+     * Retrieves the product with the specified name.
+     *
+     * @param name The name of the product to find.
+     * @return The Salable product, or null if not found.
      */
-    private List<Salable> getDefaultInventory() {
-        List<Salable> defaultInventory = new ArrayList<>();
-        
-        // Adding Weapon items
-        defaultInventory.add(new Weapon("Sword", "A sharp steel blade", 50, 5, 10, "Melee"));
-        defaultInventory.add(new Weapon("Axe", "A heavy axe", 60, 3, 15, "Melee"));
-
-        // Adding Armor items
-        defaultInventory.add(new Armor("Shield", "Protective wooden shield", 40, 3, 8, "Wood"));
-        defaultInventory.add(new Armor("Helmet", "Iron helmet for head protection", 30, 5, 5, "Metal"));
-
-        // Adding HealthPotion items
-        defaultInventory.add(new HealthPotion("Health Potion", "Restores 50 HP", 10, 10, 50, "Small"));
-        defaultInventory.add(new HealthPotion("Large Health Potion", "Restores 100 HP", 20, 5, 100, "Large"));
-
-        return defaultInventory;
-    }
-
-    public List<Salable> getInventory() { return products; }
-
     public Salable getProductByName(String name) {
         for (Salable product : products) {
             if (product.getName().equalsIgnoreCase(name)) {
                 return product;
             }
         }
-        return null;
+        return null; // Product not found
     }
 
-    /**
-     * Decreases the quantity of a product if available and returns true if successful.
-     */
+    public ArrayList<Salable> getInventory() {
+        return products;
+    }
+
+    public void addProduct(Salable product) {
+        products.add(product);
+    }
+
     public boolean removeProduct(Salable product) {
-        if (product.getQuantity() > 0) {
-            product.setQuantity(product.getQuantity() - 1);
-            return true;
-        }
-        return false;
+        return products.remove(product);
     }
 
     /**
-     * Saves the current inventory state to a JSON file.
+     * Sorts the inventory based on order: ascending or descending.
+     *
+     * @param order The sorting order, either "asc" or "desc".
      */
-    public void saveInventoryToFile() throws InventoryFileException {
-        FileService.writeInventoryToFile(DEFAULT_FILE_PATH, products);
+    public void sortInventory(String order) {
+        Collections.sort(products);
+        if ("desc".equalsIgnoreCase(order)) {
+            Collections.reverse(products);
+        }
+    }
+
+    /**
+     * Saves the current inventory to a JSON file.
+     */
+    public void saveInventoryToFile() {
+        FileService.writeInventoryToFile("inventory.json", products);
+    }
+
+    /**
+     * Provides a default inventory of products if no inventory file is available.
+     *
+     * @return An ArrayList of default Salable products.
+     */
+    private ArrayList<Salable> getDefaultInventory() {
+        ArrayList<Salable> defaultProducts = new ArrayList<>();
+        defaultProducts.add(new product.Weapon("Sword", "A sharp steel blade", 50, 5, 10, "Melee"));
+        defaultProducts.add(new product.Weapon("Axe", "A heavy axe", 60, 3, 15, "Melee"));
+        defaultProducts.add(new product.Armor("Shield", "Protective wooden shield", 40, 3, 8, "Wood"));
+        defaultProducts.add(new product.Armor("Helmet", "Iron helmet for head protection", 30, 5, 5, "Metal"));
+        defaultProducts.add(new product.HealthPotion("Health Potion", "Restores 50 HP", 10, 10, 50, "Small"));
+        defaultProducts.add(new product.HealthPotion("Large Health Potion", "Restores 100 HP", 20, 5, 100, "Large"));
+        return defaultProducts;
     }
 }

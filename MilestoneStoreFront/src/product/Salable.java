@@ -1,29 +1,22 @@
 package product;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-
-@JsonTypeInfo(
-  use = Id.NAME, 
-  include = JsonTypeInfo.As.PROPERTY, 
-  property = "type"
-)
-@JsonSubTypes({
-  @Type(value = Weapon.class, name = "weapon"),
-  @Type(value = Armor.class, name = "armor"),
-  @Type(value = HealthPotion.class, name = "healthPotion")
-})
+/**
+ * Abstract class representing a salable product in the store.
+ */
 public abstract class Salable implements Comparable<Salable> {
-    protected String name;
-    protected String description;
-    protected int price;
-    protected int quantity;
+    private String name;
+    private String description;
+    private int price;
+    private int quantity;
 
-    // Protected no-argument constructor for Jackson deserialization
-    protected Salable() {}
-
+    /**
+     * Constructor for Salable.
+     *
+     * @param name        The name of the product.
+     * @param description The description of the product.
+     * @param price       The price of the product.
+     * @param quantity    The quantity of the product available.
+     */
     public Salable(String name, String description, int price, int quantity) {
         this.name = name;
         this.description = description;
@@ -31,18 +24,27 @@ public abstract class Salable implements Comparable<Salable> {
         this.quantity = quantity;
     }
 
+    // Getters and Setters
     public String getName() { return name; }
     public String getDescription() { return description; }
     public int getPrice() { return price; }
     public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public void setQuantity(int newQuantity) { this.quantity = newQuantity; }
-
+    /**
+     * Compares this Salable product to another by name (primary) and price (secondary).
+     * 
+     * @param other The other Salable product to compare to.
+     * @return Comparison result for sorting.
+     */
     @Override
     public int compareTo(Salable other) {
-        int nameComparison = this.name.compareToIgnoreCase(other.name);
-        return nameComparison != 0 ? nameComparison : Integer.compare(this.price, other.price);
+        int nameCompare = this.name.compareToIgnoreCase(other.name);
+        return nameCompare != 0 ? nameCompare : Integer.compare(this.price, other.price);
     }
 
-    public abstract String toString();
+    @Override
+    public String toString() {
+        return name + " - " + description + " | Price: " + price + " | Quantity: " + quantity;
+    }
 }

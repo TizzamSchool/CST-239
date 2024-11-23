@@ -1,11 +1,11 @@
 package product;
 
+/**
+ * Class representing a Health Potion in the store.
+ */
 public class HealthPotion extends Salable {
     private int healingAmount;
     private String potionType;
-
-    // No-argument constructor for Jackson deserialization
-    public HealthPotion() {}
 
     public HealthPotion(String name, String description, int price, int quantity, int healingAmount, String potionType) {
         super(name, description, price, quantity);
@@ -18,7 +18,6 @@ public class HealthPotion extends Salable {
 
     @Override
     public String toString() {
-        return String.format("Health Potion: %s | %s | %d gold | Healing: %d HP | Type: %s | Qty: %d",
-                             name, description, price, healingAmount, potionType, quantity);
+        return super.toString() + " | Healing: " + healingAmount + " | Type: " + potionType;
     }
 }
