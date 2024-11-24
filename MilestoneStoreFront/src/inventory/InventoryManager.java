@@ -1,6 +1,8 @@
 package inventory;
 
 import product.Salable;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -15,53 +17,50 @@ public class InventoryManager {
     }
 
     /**
-     * Initializes the inventory from default or loads from a JSON file.
+     * Initializes the inventory from a JSON file or creates a default inventory.
      */
     public void initializeInventory() {
-        // Load or populate default items
-        products = FileService.readInventoryFromFile("inventory.json");
-        if (products == null || products.isEmpty()) {
-            products = getDefaultInventory();
-            saveInventoryToFile();
-        }
-    }
-
-    /**
-     * Retrieves the product with the specified name.
-     *
-     * @param name The name of the product to find.
-     * @return The Salable product, or null if not found.
-     */
-    public Salable getProductByName(String name) {
-        for (Salable product : products) {
-            if (product.getName().equalsIgnoreCase(name)) {
-                return product;
+        try {
+            products = FileService.readInventoryFromFile("inventory.json");
+            if (products == null || products.isEmpty()) {
+                products = getDefaultInventory();
+                saveInventoryToFile();
             }
+        } catch (Exception e) {
+            System.out.println("Error initializing inventory: " + e.getMessage());
         }
-        return null; // Product not found
-    }
-
-    public ArrayList<Salable> getInventory() {
-        return products;
-    }
-
-    public void addProduct(Salable product) {
-        products.add(product);
-    }
-
-    public boolean removeProduct(Salable product) {
-        return products.remove(product);
     }
 
     /**
-     * Sorts the inventory based on order: ascending or descending.
+     * Updates the inventory by adding new products from a JSON payload.
      *
-     * @param order The sorting order, either "asc" or "desc".
+     * @param jsonPayload The JSON string containing the list of new Salable products.
      */
-    public void sortInventory(String order) {
-        Collections.sort(products);
-        if ("desc".equalsIgnoreCase(order)) {
-            Collections.reverse(products);
+    public void updateInventory(String jsonPayload) {
+        try {
+            System.out.println("Received JSON payload: " + jsonPayload); // Debug log
+            System.out.println("Payload length: " + jsonPayload.length());
+            ObjectMapper mapper = new ObjectMapper();
+            ArrayList<Salable> newProducts = mapper.readValue(jsonPayload,
+                    mapper.getTypeFactory().constructCollectionType(ArrayList.class, Salable.class));
+            products.addAll(newProducts); // Add new products to the current inventory
+            saveInventoryToFile(); // Save the updated inventory to file
+        } catch (Exception e) {
+            System.out.println("Error updating inventory: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves the inventory as a JSON string.
+     *
+     * @return A JSON string representation of the current inventory.
+     */
+    public String getInventoryAsJSON() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(products); // Convert the products list to JSON
+        } catch (Exception e) {
+            return "Error retrieving inventory as JSON: " + e.getMessage();
         }
     }
 
@@ -73,9 +72,65 @@ public class InventoryManager {
     }
 
     /**
+     * Sorts the inventory based on the specified sort order.
+     *
+     * @param sortOrder The sorting order (e.g., "asc", "desc", "priceAsc", "priceDesc").
+     */
+    public void sortInventory(String sortOrder) {
+        // Default sorting by name (ascending)
+        products.sort(Salable::compareTo);
+
+        if (sortOrder.equalsIgnoreCase("desc")) {
+            Collections.reverse(products); // Reverse for descending order
+        }
+    }
+
+    /**
+     * Finds a product in the inventory by name.
+     *
+     * @param name The name of the product to find.
+     * @return The matching product, or null if not found.
+     */
+    public Salable getProductByName(String name) {
+        for (Salable product : products) {
+            if (product.getName().equalsIgnoreCase(name)) {
+                return product;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Removes a product from the inventory by decreasing its quantity or removing it entirely.
+     *
+     * @param product The product to remove.
+     * @return True if the product was successfully removed, false otherwise.
+     */
+    public boolean removeProduct(Salable product) {
+        if (products.contains(product)) {
+            product.setQuantity(product.getQuantity() - 1);
+            if (product.getQuantity() <= 0) {
+                products.remove(product);
+            }
+            saveInventoryToFile(); // Persist changes to the inventory file
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Retrieves the inventory as a list.
+     *
+     * @return The list of Salable products in the inventory.
+     */
+    public ArrayList<Salable> getInventory() {
+        return products;
+    }
+
+    /**
      * Provides a default inventory of products if no inventory file is available.
      *
-     * @return An ArrayList of default Salable products.
+     * @return A default list of Salable products.
      */
     private ArrayList<Salable> getDefaultInventory() {
         ArrayList<Salable> defaultProducts = new ArrayList<>();

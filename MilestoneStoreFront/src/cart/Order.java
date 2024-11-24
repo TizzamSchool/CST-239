@@ -1,10 +1,11 @@
 package cart;
 
+import cart.ShoppingCart;
 import product.Salable;
 import java.util.ArrayList;
 
 /**
- * Manages an order at checkout, including calculating total price.
+ * Represents a finalized order during checkout.
  */
 public class Order {
     private ArrayList<Salable> items;
@@ -24,13 +25,10 @@ public class Order {
     }
 
     public void displayOrderDetails() {
-        System.out.println("Order Details:");
+        System.out.println("\nOrder Details:");
         for (Salable item : items) {
             System.out.println(item);
         }
         System.out.printf("Total Price: %.2f gold pieces%n", totalPrice);
     }
-
-    public ArrayList<Salable> getItems() { return items; }
-    public double getTotalPrice() { return totalPrice; }
 }
