@@ -9,7 +9,9 @@ import java.util.Scanner;
  * Provides a menu for sending commands to the StoreFront application.
  */
 public class AdminApplication {
-    private AdminService adminService;
+    private Socket clientSocket;
+    private PrintWriter output;
+    private BufferedReader input;
 
     public static void main(String[] args) {
         AdminApplication app = new AdminApplication();
@@ -21,7 +23,7 @@ public class AdminApplication {
      */
     public void start() {
         try {
-            adminService = new AdminService("localhost", 8080); // Connect to StoreFront server
+            connectToServer(); // Establish connection to the StoreFront server
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 displayMenu();
@@ -29,22 +31,17 @@ public class AdminApplication {
                 scanner.nextLine(); // Consume newline
 
                 switch (choice) {
-                    case 1: // Update Inventory
+                    case 1:
                         System.out.println("Enter new inventory as JSON payload (end input with an empty line):");
                         String jsonPayload = readMultiLineInput(scanner);
-                        adminService.sendCommand("U", jsonPayload);
-                        String response = adminService.receiveResponse();
-                        System.out.println("Response from server: " + response);
+                        sendCommand("U", jsonPayload);
                         break;
-                    case 2: // Retrieve Inventory
-                        adminService.sendCommand("R", null);
-                        String responseR = adminService.receiveResponse();
-                        System.out.println("StoreFront Inventory:");
-                        System.out.println(responseR); // Display inventory in JSON format
+                    case 2:
+                        sendCommand("R", null);
                         break;
-                    case 3: // Exit
+                    case 3:
                         System.out.println("Exiting Admin Application...");
-                        adminService.close();
+                        disconnectFromServer(); // Close the connection
                         scanner.close();
                         return;
                     default:
@@ -57,21 +54,61 @@ public class AdminApplication {
     }
 
     /**
+     * Connects to the StoreFront server.
+     */
+    private void connectToServer() throws IOException {
+        System.out.println("Connecting to StoreFront server on localhost:8080...");
+        clientSocket = new Socket("localhost", 8080);
+        output = new PrintWriter(clientSocket.getOutputStream(), true);
+        input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        System.out.println("Connected to StoreFront server.");
+    }
+
+    /**
+     * Disconnects from the StoreFront server.
+     */
+    private void disconnectFromServer() throws IOException {
+        output.close();
+        input.close();
+        clientSocket.close();
+        System.out.println("Disconnected from StoreFront server.");
+    }
+
+    /**
+     * Sends a command to the StoreFront server and displays the response.
+     *
+     * @param command The command to send (e.g., "U", "R").
+     * @param payload The optional payload to send with the command.
+     */
+    private void sendCommand(String command, String payload) {
+        try {
+            String fullCommand = command + "|" + (payload != null ? payload : "");
+            output.println(fullCommand);
+            System.out.println("Sending command to server: " + fullCommand);
+
+            String response = input.readLine();
+            System.out.println("Response from server: " + response);
+        } catch (IOException e) {
+            System.out.println("Error sending command to server: " + e.getMessage());
+        }
+    }
+
+    /**
      * Reads multi-line input from the user until an empty line is entered.
      *
-     * @param scanner The Scanner object used to read input.
+     * @param scanner The Scanner object for reading input.
      * @return The full multi-line input as a single string.
      */
     private String readMultiLineInput(Scanner scanner) {
         StringBuilder inputBuilder = new StringBuilder();
         while (true) {
             String line = scanner.nextLine();
-            if (line.trim().isEmpty()) { // Stop reading when an empty line is entered
+            if (line.trim().isEmpty()) {
                 break;
             }
             inputBuilder.append(line);
         }
-        return inputBuilder.toString().trim(); // Ensure no extra spaces or newlines
+        return inputBuilder.toString().trim();
     }
 
     /**

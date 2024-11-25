@@ -12,6 +12,10 @@ import java.util.Collections;
 public class InventoryManager {
     private ArrayList<Salable> products;
 
+    /**
+     * Constructor for InventoryManager.
+     * Initializes the inventory list.
+     */
     public InventoryManager() {
         products = new ArrayList<>();
     }
@@ -23,11 +27,15 @@ public class InventoryManager {
         try {
             products = FileService.readInventoryFromFile("inventory.json");
             if (products == null || products.isEmpty()) {
+                System.out.println("No inventory found, loading default inventory...");
                 products = getDefaultInventory();
                 saveInventoryToFile();
+            } else {
+                System.out.println("Inventory successfully loaded from file.");
             }
         } catch (Exception e) {
             System.out.println("Error initializing inventory: " + e.getMessage());
+            products = getDefaultInventory();
         }
     }
 
@@ -38,13 +46,14 @@ public class InventoryManager {
      */
     public void updateInventory(String jsonPayload) {
         try {
-            System.out.println("Received JSON payload: " + jsonPayload); // Debug log
+            System.out.println("Received JSON payload: " + jsonPayload);
             System.out.println("Payload length: " + jsonPayload.length());
             ObjectMapper mapper = new ObjectMapper();
             ArrayList<Salable> newProducts = mapper.readValue(jsonPayload,
                     mapper.getTypeFactory().constructCollectionType(ArrayList.class, Salable.class));
             products.addAll(newProducts); // Add new products to the current inventory
             saveInventoryToFile(); // Save the updated inventory to file
+            System.out.println("Inventory updated successfully.");
         } catch (Exception e) {
             System.out.println("Error updating inventory: " + e.getMessage());
         }
@@ -74,7 +83,7 @@ public class InventoryManager {
     /**
      * Sorts the inventory based on the specified sort order.
      *
-     * @param sortOrder The sorting order (e.g., "asc", "desc", "priceAsc", "priceDesc").
+     * @param sortOrder The sorting order (e.g., "asc", "desc").
      */
     public void sortInventory(String sortOrder) {
         // Default sorting by name (ascending)
